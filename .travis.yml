@@ -1,0 +1,43 @@
+language: python
+cache: pip
+stages:
+- name: linting
+- name: test
+- name: deploy
+  if: tag IS present
+python:
+- 2.7
+- 3.5
+- 3.6
+env:
+  global:
+    secure:
+    - vnOtyftJN/Ts6rvbyOtlMZJr/5A0EPpLZol5M0UZ1yQro9b7lEFBdpxSRj3NmFzbGJ6EfcjrAH6FTWXT5UETi6ygPLP7UXx3NjjPbI+CCWFjDH5TmMMVOHbz6zofdVTIIdFuiNS/yNCQHl3OH0DqIIhgAb/5Irld5YAmGdwg3CEXNiidmgaroCEEnI/w4Dxs2cgzfRCVOPl06JNHERHgQUL35fg5INJj1Eu2CpIv8Z/VmdgrX/490mxCokY9aRpV2KCfvF5IrYT0ZkJ42h43+kXh+rCk/sVPINdzImCiCshWRU+9zkrAejyDYKK5KGHqd5M97xfAaMf7MWQ7c8FVjXluXTbwU0yE1/Ge9ImfJqRJiekCUwNYzu9FoyX/HOwV/AVGBUJT/6os0KECO8nvpd/3du1rdtn3jArY2XIy4NVeXndMvAjRuqFMqrWkw5Lv5Js7dh4IUyPxmNFO96zaRGGpYTq4HCbx4j8IQWAkS3+AucOEEYo13HfUmPv70ooqKtw5nQsLuoTVwdQO1OWgFFdMdTCxohkFF5/mPemEq+Qp1KHUqpEvNf188xL8hec9jfvmCYN3+//+vc0EnYp+CC8YfxLfyYXdDRNfbSlSUKMt3koDq+cbwB4t413OQLmqQNQGi6t57A13dHdueOxJ6AOaWLWh8QbrJcB8v06ujQA=
+install:
+- pip install tox-travis
+- pip install codecov
+script:
+- tox
+after_success:
+- codecov
+jobs:
+  include:
+  - stage: linting
+    python: 3.6
+    env: TOXENV=pre-commit
+  - stage: linting
+    python: 3.6
+    env: TOXENV=check-readme
+  - stage: deploy
+    python: 3.6
+    if: tag IS present
+    deploy:
+      provider: pypi
+      user: xoe-labs
+      password:
+        secure: "$PYPI_TOKEN"
+      distributions: sdist bdist_wheel
+      skip_upload_docs: true
+      on:
+        repo: xoe-labs/odooup
+        tags: true
