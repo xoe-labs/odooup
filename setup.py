@@ -19,7 +19,7 @@ setup(
     use_scm_version=True,
     packages=find_packages(),
     setup_requires=["setuptools-scm"],
-    install_requires=["click", "click-plugins"],
+    install_requires=["click", "click-plugins", "future"],
     license="LGPLv3+",
     author="XOE Labs",
     author_email="info@xoe.solutions",

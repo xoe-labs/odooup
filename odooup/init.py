@@ -2,13 +2,17 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+from collections import OrderedDict
 from distutils.spawn import find_executable
 
 import click
-from _helpers import call_cmd, mkdir_p, replace_in_file
-from _installers import install_compose_impersonation, install_make, install_precommit
 
-ODOO_VERSIONS = {"10": "10.0", "11": "11.0", "12": "12.0", "m": "master"}
+from ._helpers import call_cmd, mkdir_p, replace_in_file
+from ._installers import install_compose_impersonation, install_make, install_precommit
+
+ODOO_VERSIONS = OrderedDict(
+    [("10", "10.0"), ("11", "11.0"), ("12", "12.0"), ("m", "master")]
+)
 
 IS_GIT_URL_REGEXP = (
     r"(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|\#[-\d\w._]+?)$"
@@ -20,16 +24,12 @@ class OdooVersionChoice(click.types.Choice):
     name = "odoo-version"
 
     def __init__(self, versions, case_sensitive=True):
-        super(OdooVersionChoice, self).__init__(versions, case_sensitive)
         self.versions = versions
-        click.echo("\nAvailable Odoo Versions:")
-        click.echo(
-            "   ".join(["{}) {}".format(k, v) for k, v in self.versions.items()])
-        )
+        super(OdooVersionChoice, self).__init__(self.versions.keys(), case_sensitive)
 
     def convert(self, value, param, ctx):
         value = super(OdooVersionChoice, self).convert(value, param, ctx)
-        return self.choices[value]
+        return self.versions[value]
 
 
 class GitRepo(click.types.StringParamType):
@@ -92,7 +92,9 @@ def ask_for_additional_repos():
 @click.option(
     "--odoo-version",
     type=OdooVersionChoice(ODOO_VERSIONS),
-    prompt="Please select Odoo version",
+    prompt="Please select Odoo version: \n Available: "
+    + ", ".join(["{}".format(v) for v in ODOO_VERSIONS.values()])
+    + "\n Select:",
 )
 @click.option(
     "--shallow/--no-shallow",
@@ -109,7 +111,7 @@ def ask_for_additional_repos():
     prompt="Use Odoo Enterprise (access required)",
     help="Clone enterprise repository (access required).",
 )
-@click.argument("project", required=False)
+@click.argument("project", required=True)
 def init(odoo_version, shallow, reference_project, is_enterprise, project):
     """ Bootstrap you Odoo project """
     additional_repos = ask_for_additional_repos()
@@ -194,7 +196,6 @@ def init(odoo_version, shallow, reference_project, is_enterprise, project):
         )
 
     # Seed Placeholders
-    # project = os.path.basename(os.path.dirname(os.path.join(get_hack_dir())))
     replacements = {
         ("Dockerfile", ".env"): [
             {"from": "{{ PROJECT }}", "to": project},

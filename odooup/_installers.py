@@ -3,7 +3,8 @@ import os
 import platform
 
 import click
-from _helpers import call_cmd
+
+from ._helpers import call_cmd
 
 
 def install_make():
