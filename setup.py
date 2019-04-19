@@ -40,7 +40,6 @@ setup(
         odooup=odooup.cli:main
         [core_package.cli_plugins]
         init=odooup.init:init
-        [core_package.cli_plugins]
         repo=odooup.repo:repo
     """,
 )
