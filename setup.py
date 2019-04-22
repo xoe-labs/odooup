@@ -23,7 +23,7 @@ setup(
     license="LGPLv3+",
     author="XOE Labs",
     author_email="info@xoe.solutions",
-    url="http://github.com/xoe-labs/odoouhp",
+    url="http://github.com/xoe-labs/odooup",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
