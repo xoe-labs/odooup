@@ -252,6 +252,7 @@ class Git(object):
         return res
 
     def _backport_name(self, candidate, source, target, tag="BRANCH"):
+        candidate = candidate.replace(BACKPORT_FLAG + "-" + tag + "-", "")
         return candidate.replace(
             self.remote + "/" + source + "-",
             self.remote + "/" + target + "-" + BACKPORT_FLAG + "-" + tag + "-",
