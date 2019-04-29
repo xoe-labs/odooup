@@ -26,17 +26,18 @@ jobs:
     env: TOXENV=pre-commit
   - stage: linting
     env: TOXENV=check-readme
-deploy:
-  provider: pypi
-  user: xoe-labs
-  password:
-    secure: "$PYPI_TOKEN"
-  distributions: sdist bdist_wheel
-  skip_upload_docs: true
-  on:
-    repo: xoe-labs/odooup
-    tags: true
-    condition: "$TRAVIS_STAGE = deploy"
+  - stage: deploy
+    script: echo "Deploy to PyPi"
+    deploy:
+      provider: pypi
+      user: xoe-labs
+      password:
+        secure: "$PYPI_TOKEN"
+      distributions: sdist bdist_wheel
+      skip_upload_docs: true
+      on:
+        repo: xoe-labs/odooup
+        tags: true
 env:
   global:
     secure: GlXAEAiFv3rwjxD0XVW2C/luwR0YN/jKBQexA/K4g2sC6INt0L+T7IMPSzYb7/XdwaWRJPZ/d2KKVHgd6DH7NxMf1bVchLl+ldK5/oHdwWhIKOLq+mEsTi9fOJTqMgZPgPqF7FSlcFKypp+/DLbLlQ4UReswWEg3BX0a0J1AxP0EmA4OefUuMMWMf7hChdSr1RLs/FqKfjwYteAHpAp228+BgmoUtGai65PDUG6aBqiFP5XnXAkmKmprhy07RHoZY0KB1sSlfkAubostesg2fKk0mZfREoeIasO1AV/N+y0w4TsCOh+BVih4O9OYWCM20TqmGNnEcMLSkz8aWfc3ewbATSNk/bpjgU8gHAhUl1oJDXxQtZLjavUgQ7wr47FwXp1BLZ/KPAW4pDVf1AYfEe0VP0evU2zLznQqDvT0vIeSiCWTnNhHAEAv+maK300rkPnVtDxM2o2/7yab+rjqdrDZn1O2g27gDbqsfKk1eMkUHgva32Z3bfZYrRT+OcwVRBhm+j9FV49UdjbgC9vTCRI8z8SB9QGJHDt1gsNC6GUAKdGrZlkiebB5UgL1hu1kw4T0xdjcvTPZjnftnz/Lvki3/FOR1ehCtArLF0zTXPLH6fOdyPRal2V+2qfk6cqv+/EMULGPyrh1myOZWSaHfYwMfQiQ4vPzwcQed6lzCnI=
