@@ -206,7 +206,7 @@ class Git(object):
                 self.run(["branch", "-D", staging_backport_name])
 
     def backport_patch(self, refspec, target, name):
-        candidate = (self.remote + "/-" + name,)
+        candidate = self.remote + "/-" + name
         backport_name = self._backport_name(candidate, "", target, tag="COMMIT")
         staging_backport_name = self._get_staging_name(backport_name)
         self.checkout(target, staging_backport_name)
