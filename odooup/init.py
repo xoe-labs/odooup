@@ -92,6 +92,7 @@ def clone_target(odoo_version, url, target, shallow, reference_project):
                 target=target
             )
         )
+        cmds.append("mkdir -p {target}".format(target=target))
         cmds.append(
             "git -C {target} clone -b {odoo_version} --depth 1 {url} .".format(
                 target=target, odoo_version=odoo_version, url=url
