@@ -73,8 +73,8 @@ def clone_target(odoo_version, url, target, shallow, reference_project):
             )
         )
         cmds.append(
-            "git config -f .gitmodules submodule.{target}.path {target}".format(
-                target=target
+            "git config -f .gitmodules submodule.{target}.path {path}".format(
+                target=target, path=target[2:]
             )
         )
         cmds.append(
