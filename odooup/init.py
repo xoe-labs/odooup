@@ -62,13 +62,41 @@ def clone_target(odoo_version, url, target, shallow, reference_project):
         )
     else:
         cmds = []
-        cmds.append("git config -f .git/config submodule.{target}.url {url}".format(target=target, url=url))
-        cmds.append("git config -f .git/config submodule.{target}.active true".format(target=target))
-        cmds.append("git config -f .gitmodules submodule.{target}.path {target}".format(target=target))
-        cmds.append("git config -f .gitmodules submodule.{target}.url {url}".format(target=target, url=url))
-        cmds.append("git config -f .gitmodules submodule.{target}.branch {odoo_version}".format(target=target, odoo_version=odoo_version))
-        cmds.append("git config -f .gitmodules submodule.{target}.shallow true".format(target=target))
-        cmds.append("git -C {target} clone -b {odoo_version} --depth 1 {url} .".format(target=target, odoo_version=odoo_version, url=url))
+        cmds.append(
+            "git config -f .git/config submodule.{target}.url {url}".format(
+                target=target, url=url
+            )
+        )
+        cmds.append(
+            "git config -f .git/config submodule.{target}.active true".format(
+                target=target
+            )
+        )
+        cmds.append(
+            "git config -f .gitmodules submodule.{target}.path {target}".format(
+                target=target
+            )
+        )
+        cmds.append(
+            "git config -f .gitmodules submodule.{target}.url {url}".format(
+                target=target, url=url
+            )
+        )
+        cmds.append(
+            "git config -f .gitmodules submodule.{target}.branch {odoo_version}".format(
+                target=target, odoo_version=odoo_version
+            )
+        )
+        cmds.append(
+            "git config -f .gitmodules submodule.{target}.shallow true".format(
+                target=target
+            )
+        )
+        cmds.append(
+            "git -C {target} clone -b {odoo_version} --depth 1 {url} .".format(
+                target=target, odoo_version=odoo_version, url=url
+            )
+        )
         cmd = " && ".join(cmds)
         call_cmd(cmd, echo_cmd=True, exit_on_error=False)
 
