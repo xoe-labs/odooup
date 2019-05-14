@@ -5,6 +5,12 @@ Changes
 .. ----------
 .. -
 
+0.0.4 (2019-05-14)
+------------------
+Fixed
+^^^^^
+- Fix shallow submodules for any version of Odoo
+
 0.0.3 (2019-05-02)
 ------------------
 Fixed
