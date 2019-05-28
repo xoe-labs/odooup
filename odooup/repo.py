@@ -46,9 +46,10 @@ class Git(object):
     def __exit__(self, exception_type, exception_value, traceback):
         self.run(["checkout", self.head])
 
-    def __init__(self, git_dir, remote, branches=None):
+    def __init__(self, git_dir, remote, branches=None, upstream=None):
         self.git_dir = git_dir
         self.remote = remote
+        self.upstream = upstream
         self.branches = branches or []
         self.head = None
         click.echo("==> Git-Dir: %s" % self.git_dir)
@@ -143,15 +144,15 @@ class Git(object):
     def update_remote(self):
         """ Updates odoo-dev remote from tracked remote branches """
         click.secho("UPDATE: Running update ...", bg="green", fg="white")
-        self.run(["fetch", "--all", "--prune"])
+        self.run(["fetch", "--all", "--prune", self.upstream])
         for branch in self.branches:
             click.secho(
                 "UPDATE: %s - Updating local base-branch ..." % branch, fg="green"
             )
             self.checkout(branch)
-            self.run(["merge"])
+            self.run(["pull", self.upstream, branch + ":" + branch])
             click.secho("UPDATE: %s - Pushing base-branch ..." % branch, fg="green")
-            self.run(["push", self.remote])
+            self.run(["push", self.remote, branch + ":" + branch])
 
     def rebase_patches(self, patchname=None):
         click.secho("REBASE: Rebasing patch branches ...", bg="cyan", fg="white")
@@ -261,18 +262,24 @@ class Git(object):
 
 @click.group()
 @click.option("--git-dir", default="vendor/odoo/cc/.git", help="Local Repo Git-Dir.")
-@click.option("--remote", default="dev", help="Name of odoo-dev remote.")
+@click.option("--origin", default="origin", help="Name of odoo-dev origin.")
+@click.option("--upstream", default="upstream", help="Name of odoo-dev upstream.")
 @click.pass_context
-def repo(ctx, git_dir, remote):
+def repo(ctx, git_dir, origin, upstream):
     """ Run git commands for custom odoo-dev repository.
     """
     ctx.ensure_object(dict)
 
-    ctx.obj["GIT"] = Git(git_dir, remote)
+    ctx.obj["GIT"] = Git(git_dir, origin, upstream=upstream)
 
 
 @repo.command()
-@click.option("--update/--no-update", "-u", default=False, help="Update remote repo.")
+@click.option(
+    "--update/--no-update",
+    "-u",
+    default=False,
+    help="Update origin from tracking branches.",
+)
 @click.option("--rebase/--no-rebase", "-r", default=False, help="Rebase patches.")
 @click.option(
     "--compile/--no-compile",
@@ -293,6 +300,10 @@ def maintain(ctx, update, rebase, compile_branch, auto, branches):
     git._add_branches(list(branches))
 
     if update or auto:
+        if not git.upstream:
+            click.get_current_context().fail(
+                "For running a repo update, please specify --upstream. Aborting."
+            )
         git.update_remote()
     if rebase or auto:
         git.rebase_patches()
