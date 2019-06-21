@@ -5,9 +5,16 @@ import re
 from collections import OrderedDict
 from distutils.spawn import find_executable
 
+import appdirs
 import click
 
-from ._helpers import call_cmd, mkdir_p, replace_in_file
+from ._helpers import (
+    call_cmd,
+    construe_git_url,
+    mkdir_p,
+    parse_git_url,
+    replace_in_file,
+)
 from ._installers import install_compose_impersonation, install_make, install_precommit
 
 ODOO_VERSIONS = OrderedDict(
@@ -17,7 +24,6 @@ ODOO_VERSIONS = OrderedDict(
 IS_GIT_URL_REGEXP = (
     r"(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|\#[-\d\w._]+?)$"
 )
-REPO_REGEXP = "(?P<host>(git@|https://)([\\w\\.@]{1,})(/|:))(?P<owner>[\\w,\\-,_]{1,})/(?P<repo>[\\w,\\-,_]{1,})(.git){0,1}((/){0,1})"  # noqa
 
 
 class OdooVersionChoice(click.types.Choice):
@@ -45,73 +51,39 @@ class GitRepo(click.types.StringParamType):
         return value
 
 
-def clone_target(odoo_version, url, target, shallow, reference_project):
-    if not shallow:
-        call_cmd(
-            "git submodule add -b {odoo_version} {reference} "
-            "{url} {target}".format(
-                odoo_version=odoo_version,
-                reference="--reference {}/{}".format(reference_project, target)
-                if reference_project
-                else "",
-                url=url,
-                target=target,
-            ),
-            echo_cmd=True,
-            exit_on_error=False,
-        )
-    else:
-        cmds = []
-        cmds.append(
-            "git config -f .git/config submodule.{target}.url {url}".format(
-                target=target, url=url
-            )
-        )
-        cmds.append(
-            "git config -f .git/config submodule.{target}.active true".format(
-                target=target
-            )
-        )
-        cmds.append(
-            "git config -f .gitmodules submodule.{target}.path {path}".format(
-                target=target, path=target[2:]
-            )
-        )
-        cmds.append(
-            "git config -f .gitmodules submodule.{target}.url {url}".format(
-                target=target, url=url
-            )
-        )
-        cmds.append(
-            "git config -f .gitmodules submodule.{target}.branch {odoo_version}".format(
-                target=target, odoo_version=odoo_version
-            )
-        )
-        cmds.append(
-            "git config -f .gitmodules submodule.{target}.shallow true".format(
-                target=target
-            )
-        )
-        cmds.append("mkdir -p {target}".format(target=target))
-        cmds.append(
-            "git -C {target} clone -b {odoo_version} --depth 1 {url} .".format(
-                target=target, odoo_version=odoo_version, url=url
-            )
-        )
-        cmd = " && ".join(cmds)
-        call_cmd(cmd, echo_cmd=True, exit_on_error=False)
+def _cache_repo(prefix, host, org, project):
+    """ Cache repo locally (or update cache) """
+    # init cache directory
+
+    cache_dir = appdirs.user_cache_dir("odooup")
+    repo_cache_dir = os.path.join(cache_dir, host, org.lower(), project.lower())
+
+    if not os.path.isdir(repo_cache_dir):
+        mkdir_p(repo_cache_dir)
+        cmd = ["git", "init", "--bare"]
+        call_cmd(" ".join(cmd), echo_cmd=False, exit_on_error=True, cwd=repo_cache_dir)
+    repo_url = construe_git_url(prefix, host, org, project)
+    # fetch all branches into cache
+    cmd = ["git", "fetch", "--quiet", "--force", repo_url, "refs/heads/*:refs/heads/*"]
+    call_cmd(" ".join(cmd), echo_cmd=True, exit_on_error=True, cwd=repo_cache_dir)
+    return repo_cache_dir
+
+
+def clone_target(branch, url, target):
+    repo_cache_dir = _cache_repo(*parse_git_url(url))
+    reference = "--reference {}".format(repo_cache_dir)
+    call_cmd(
+        "git submodule add -b {branch} {reference} "
+        "{url} {target}".format(**locals()),
+        echo_cmd=True,
+        exit_on_error=False,
+    )
 
 
 def get_target(repo_url):
-    org = os.path.basename(os.path.dirname(repo_url))
-    matches = re.search(REPO_REGEXP, repo_url)
-    try:
-        repo_name = matches.group("repo")
-    except (AttributeError, IndexError):
-        repo_name = os.path.basename(repo_url).split(".")[0]
-
+    _, _, project, org = parse_git_url(repo_url)
     mkdir_p(os.path.join("vendor", org))
-    return "./vendor/{org}/{repo_name}".format(org=org, repo_name=repo_name)
+    return "./vendor/{org}/{repo_name}".format(org=org, repo_name=project)
 
 
 def ask_for_additional_repos():
@@ -137,14 +109,6 @@ def ask_for_additional_repos():
     + "\n Select:",
 )
 @click.option(
-    "--shallow/--no-shallow",
-    default=True,
-    help="Do shallow clones by default. (depth=1)",
-)
-@click.option(
-    "--reference-project", required=False, help="Reference project to speed up cloning."
-)
-@click.option(
     "--is-enterprise",
     is_flag=True,
     default=False,
@@ -152,7 +116,7 @@ def ask_for_additional_repos():
     help="Clone enterprise repository (access required).",
 )
 @click.argument("project", required=True)
-def init(odoo_version, shallow, reference_project, is_enterprise, project):
+def init(odoo_version, is_enterprise, project):
     """ Bootstrap you Odoo project """
     additional_repos = ask_for_additional_repos()
     project = project.lower()  # docker doesn't permit uppercase project names
@@ -160,20 +124,6 @@ def init(odoo_version, shallow, reference_project, is_enterprise, project):
     click.echo("")
     click.secho("Your choices: ", fg="black", bg="bright_green", bold=True)
     click.echo("")
-    click.echo("Reference project: ", nl=False)
-    if reference_project:
-        shallow = False
-        click.secho(reference_project, fg="yellow", bold=True)
-
-    else:
-        click.secho("None", fg="yellow", bold=True)
-
-    click.echo("Clone depth:       ", nl=False)
-    if shallow:
-        click.secho("1", fg="yellow", bold=True)
-    else:
-        click.secho("Full", fg="yellow", bold=True)
-
     click.echo("Odoo Edition:      ", nl=False)
     ee = "EE (Enterprise Edition)"
     ce = "CE (Community Edition)"
@@ -216,23 +166,11 @@ def init(odoo_version, shallow, reference_project, is_enterprise, project):
 
     # Repo cloning
     for repo_url in additional_repos:
-        clone_target(
-            odoo_version, repo_url, get_target(repo_url), shallow, reference_project
-        )
-    clone_target(
-        odoo_version,
-        "https://github.com/odoo/odoo.git",
-        "./vendor/odoo/cc",
-        shallow,
-        reference_project,
-    )
+        clone_target(odoo_version, repo_url, get_target(repo_url))
+    clone_target(odoo_version, "https://github.com/odoo/odoo.git", "./vendor/odoo/cc")
     if is_enterprise:
         clone_target(
-            odoo_version,
-            "https://github.com/odoo/enterprise.git",
-            "./vendor/odoo/ee",
-            shallow,
-            reference_project,
+            odoo_version, "https://github.com/odoo/enterprise.git", "./vendor/odoo/ee"
         )
 
     # Seed Placeholders
