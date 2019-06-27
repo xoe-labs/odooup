@@ -19,7 +19,7 @@ setup(
     use_scm_version=True,
     packages=find_packages(),
     setup_requires=["setuptools-scm"],
-    install_requires=["click", "click-plugins", "future", "appdirs"],
+    install_requires=["click", "click-plugins", "future", "appdirs", "networkx"],
     license="LGPLv3+",
     author="XOE Labs",
     author_email="info@xoe.solutions",
@@ -41,5 +41,6 @@ setup(
         [core_package.cli_plugins]
         init=odooup.init:init
         repo=odooup.repo:repo
+        whitelist=odooup.whitelist:whitelist
     """,
 )
