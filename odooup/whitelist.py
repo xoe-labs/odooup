@@ -237,12 +237,14 @@ def whitelist(module, skip_native):
             existing = set()
             _symlink_sparse_file(ns)
 
-        should = include[ns] | {"!setup/**"}
-        missing = should - existing
+        missing = include[ns] - existing
         if not missing:
             continue
-        with open(ns_path, "a") as f:
-            f.write("\n".join(missing) + "\n")
+        should = include[ns] | existing
+        # Make sure setup exepmtion is the last item
+        should.remove("!setup/**")
+        with open(ns_path, "w") as f:
+            f.write("\n".join(should) + "\n!setup/**\n")
 
     while _reconcile_auto_install(g):
         pass
