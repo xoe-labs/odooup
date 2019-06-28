@@ -1,6 +1,7 @@
 import os
 
 import click
+import networkx
 from networkx import ancestors, dag_longest_path, dag_longest_path_length, subgraph
 
 from ._helpers import call_cmd
@@ -175,8 +176,27 @@ def whitelist(module, skip_native):
         click.get_current_context().fail("You are not inside a work tree.")
     rootpath = os.path.abspath(".")
     g = get_graph(rootpath)
-    deps = ancestors(g, module)
+    try:
+        deps = ancestors(g, module)
+    except networkx.exception.NetworkXError:
+        click.secho(
+            "UNKNOWN MODULE: '{}' is not in the module graph built from "
+            "{}.".format(module, rootpath),
+            fg="red",
+            bold=True,
+        )
+        click.get_current_context().exit(code=1)
+
     node = g.node[module]
+    if not node:
+        click.secho(
+            "MISSING MODULE, BUT REFERENCED: While '{}' is itself listed as a "
+            "dependency somewhere, it was found nowhere under "
+            "{}.".format(module, rootpath),
+            fg="red",
+            bold=True,
+        )
+        click.get_current_context().exit(code=1)
 
     _warn_path_length(g, deps)
 
