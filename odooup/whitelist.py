@@ -207,21 +207,25 @@ def whitelist(module, skip_native):
         )
 
     include = {node["namespace"]: {module}}
+    fail = False
     for dep in deps:
         node = g.node[dep]
         if not node:
+            fail = True
             click.secho(
                 "MISSING DEPENDENCY: The dependency '{}' was found nowhere "
                 "under {}.".format(dep, rootpath),
                 fg="red",
                 bold=True,
             )
-            click.get_current_context().exit(code=1)
+            continue
         ns = node["namespace"]
         if skip_native and "vendor/odoo" in node["namespace"]:
             continue
         include.setdefault(ns, set())
         include[ns] |= {dep}
+    if fail:
+        click.get_current_context().exit(code=1)
 
     for ns in include.keys():
         _enable_sparse_echout_for_repo(ns)
