@@ -50,16 +50,25 @@ def _warn_path_length(g, deps):
         click.secho(" > ".join(dag_longest_path(sub)), fg="white", bold=True)
 
 
-def _enable_sparse_echout_for_repo(ns):
-    if (
-        call_cmd(
-            "git config core.sparseCheckout",
-            echo_cmd=False,
-            exit_on_error=False,
-            cwd=ns,
-        )
-        != "True"
-    ):
+def enable_sparse_echout_for_repo(g):
+    namespaces = set()
+    for module in g:
+        node = g.node[module]
+        if not node:
+            continue
+        namespaces |= {node["namespace"]}
+    for ns in namespaces:
+        if not os.path.isfile(_get_sparse_persistence_file(ns)) or (
+            call_cmd(
+                "git config core.sparseCheckout",
+                echo_cmd=False,
+                exit_on_error=False,
+                cwd=ns,
+            )
+            == "True"
+        ):
+            continue
+        _symlink_sparse_file(ns)
         call_cmd("git config core.sparseCheckout True", exit_on_error=False, cwd=ns)
 
 
@@ -228,23 +237,24 @@ def whitelist(module, skip_native):
         click.get_current_context().exit(code=1)
 
     for ns in include.keys():
-        _enable_sparse_echout_for_repo(ns)
         ns_path = _get_sparse_persistence_file(ns)
         if os.path.isfile(ns_path):
             with open(ns_path, "r") as f:
                 existing = set(f.read().splitlines())
         else:
             existing = set()
-            _symlink_sparse_file(ns)
 
         missing = include[ns] - existing
         if not missing:
             continue
         should = include[ns] | existing
         # Make sure setup exepmtion is the last item
-        should.remove("!setup/**")
+        if "!setup/**" in should:
+            should.remove("!setup/**")
         with open(ns_path, "w") as f:
             f.write("\n".join(should) + "\n!setup/**\n")
+
+    enable_sparse_echout_for_repo(g)
 
     while _reconcile_auto_install(g):
         pass

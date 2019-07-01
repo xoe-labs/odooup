@@ -5,16 +5,10 @@ import re
 from collections import OrderedDict
 from distutils.spawn import find_executable
 
-import appdirs
 import click
+from clone import clone_submodule_to_target, get_vendor_target
 
-from ._helpers import (
-    call_cmd,
-    construe_git_url,
-    mkdir_p,
-    parse_git_url,
-    replace_in_file,
-)
+from ._helpers import call_cmd, replace_in_file
 from ._installers import install_compose_impersonation, install_make, install_precommit
 
 ODOO_VERSIONS = OrderedDict(
@@ -49,41 +43,6 @@ class GitRepo(click.types.StringParamType):
             self.fail(click.style(value, fg="red") + " is not a git url", param, ctx)
 
         return value
-
-
-def _cache_repo(prefix, host, org, project):
-    """ Cache repo locally (or update cache) """
-    # init cache directory
-
-    cache_dir = appdirs.user_cache_dir("odooup")
-    repo_cache_dir = os.path.join(cache_dir, host, org.lower(), project.lower())
-
-    if not os.path.isdir(repo_cache_dir):
-        mkdir_p(repo_cache_dir)
-        cmd = ["git", "init", "--bare"]
-        call_cmd(" ".join(cmd), echo_cmd=False, exit_on_error=True, cwd=repo_cache_dir)
-    repo_url = construe_git_url(prefix, host, org, project)
-    # fetch all branches into cache
-    cmd = ["git", "fetch", "--quiet", "--force", repo_url, "refs/heads/*:refs/heads/*"]
-    call_cmd(" ".join(cmd), echo_cmd=True, exit_on_error=True, cwd=repo_cache_dir)
-    return repo_cache_dir
-
-
-def clone_target(branch, url, target):
-    repo_cache_dir = _cache_repo(*parse_git_url(url))
-    reference = "--reference {}".format(repo_cache_dir)
-    call_cmd(
-        "git submodule add -b {branch} {reference} "
-        "{url} {target}".format(**locals()),
-        echo_cmd=True,
-        exit_on_error=False,
-    )
-
-
-def get_target(repo_url):
-    _, _, project, org = parse_git_url(repo_url)
-    mkdir_p(os.path.join("vendor", org))
-    return "./vendor/{org}/{repo_name}".format(org=org, repo_name=project)
 
 
 def ask_for_additional_repos():
@@ -166,10 +125,12 @@ def init(odoo_version, is_enterprise, project):
 
     # Repo cloning
     for repo_url in additional_repos:
-        clone_target(odoo_version, repo_url, get_target(repo_url))
-    clone_target(odoo_version, "https://github.com/odoo/odoo.git", "./vendor/odoo/cc")
+        clone_submodule_to_target(odoo_version, repo_url, get_vendor_target(repo_url))
+    clone_submodule_to_target(
+        odoo_version, "https://github.com/odoo/odoo.git", "./vendor/odoo/cc"
+    )
     if is_enterprise:
-        clone_target(
+        clone_submodule_to_target(
             odoo_version, "https://github.com/odoo/enterprise.git", "./vendor/odoo/ee"
         )
 

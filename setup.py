@@ -42,5 +42,6 @@ setup(
         init=odooup.init:init
         repo=odooup.repo:repo
         whitelist=odooup.whitelist:whitelist
+        clone=odooup.clone:clone
     """,
 )

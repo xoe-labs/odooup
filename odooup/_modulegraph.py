@@ -13,6 +13,7 @@ class ManifestContainer(object):
 
 
 MANIFEST_NAMES = ("__manifest__.py", "__openerp__.py", "__terp__.py")
+SKIP_PATHS = ["point_of_sale/tools"]
 
 
 class NoManifestFound(Exception):
@@ -41,6 +42,8 @@ def _read_manifest(addon_dir):
 def _find_addons(dir):
     """ yield (addon_name, addon_dir, manifest) """
     for root, _, files in os.walk(dir):
+        if any(s in root for s in SKIP_PATHS):
+            continue
         if any(M in files for M in MANIFEST_NAMES):
             yield os.path.dirname(root), os.path.basename(root), _read_manifest(root)
 
