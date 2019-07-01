@@ -6,10 +6,10 @@ from collections import OrderedDict
 from distutils.spawn import find_executable
 
 import click
-from clone import clone_submodule_to_target, get_vendor_target
 
 from ._helpers import call_cmd, replace_in_file
 from ._installers import install_compose_impersonation, install_make, install_precommit
+from .clone import clone_submodule_to_target, get_vendor_target
 
 ODOO_VERSIONS = OrderedDict(
     [("10", "10.0"), ("11", "11.0"), ("12", "12.0"), ("m", "master")]
