@@ -4,8 +4,7 @@ import click
 
 from ._cache import cache_repo, parse_git_url
 from ._helpers import call_cmd, mkdir_p
-from ._modulegraph import get_graph
-from .whitelist import enable_sparse_echout_for_repo
+from .whitelist import enable_sparse_checkout_for_repo
 
 
 def _clone(branch, url):
@@ -21,7 +20,7 @@ def _clone(branch, url):
     return target
 
 
-def _clone_submodules(target, dissociate):
+def _clone_submodules(branch, target, dissociate):
     submodules = [
         s.split(" ")[1]
         for s in call_cmd(
@@ -58,6 +57,19 @@ def _clone_submodules(target, dissociate):
             exit_on_error=False,
             cwd=target,
         )
+    call_cmd(
+        "git submodule foreach git config remote.origin.fetch "
+        "+refs/heads/{branch}:refs/remotes/origin/{branch}".format(**locals()),
+        echo_cmd=False,
+        exit_on_error=True,
+        cwd=target,
+    )
+    call_cmd(
+        "git submodule foreach git fetch --all --prune",
+        echo_cmd=False,
+        exit_on_error=True,
+        cwd=target,
+    )
 
 
 def clone_submodule_to_target(branch, url, target):
@@ -102,10 +114,9 @@ def get_vendor_target(repo_url):
 @click.argument("url", required=True)
 def clone(branch, url, whitelist, dissociate):
     target = _clone(branch, url)
+    _clone_submodules(branch, target, dissociate)
     if whitelist:
-        g = get_graph(target)
-        enable_sparse_echout_for_repo(g)
-    _clone_submodules(target, dissociate)
+        enable_sparse_checkout_for_repo(target)
 
 
 if __name__ == "__main__":
