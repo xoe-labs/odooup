@@ -3,12 +3,11 @@
 import os
 import re
 from collections import OrderedDict
-from distutils.spawn import find_executable
 
 import click
 
 from ._helpers import call_cmd, replace_in_file
-from ._installers import install_compose_impersonation, install_make, install_precommit
+from ._installers import install_tools
 from .clone import clone_submodule_to_target, get_vendor_target
 
 ODOO_VERSIONS = OrderedDict(
@@ -95,12 +94,7 @@ def init(odoo_version, is_enterprise, project):
     click.secho("Get some work done ...", fg="black", bg="bright_green", bold=True)
     click.echo("")
 
-    # Make sure basic stuff is there
-    if not find_executable("make"):
-        install_make()
-    if not find_executable("pre-commit"):
-        install_precommit()
-    install_compose_impersonation()
+    install_tools()
 
     if (
         project

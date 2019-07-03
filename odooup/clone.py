@@ -4,6 +4,7 @@ import click
 
 from ._cache import cache_repo, parse_git_url
 from ._helpers import call_cmd, mkdir_p
+from ._installers import install_tools
 from .whitelist import enable_sparse_checkout_for_repo
 
 
@@ -113,6 +114,7 @@ def get_vendor_target(repo_url):
 @click.argument("branch", required=True)
 @click.argument("url", required=True)
 def clone(branch, url, whitelist, dissociate):
+    install_tools()
     target = _clone(branch, url)
     _clone_submodules(branch, target, dissociate)
     if whitelist:

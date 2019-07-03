@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import platform
+from distutils.spawn import find_executable
 
 import click
 
@@ -57,3 +58,12 @@ def install_compose_impersonation():
                 ),
                 fg="red",
             )
+
+
+def install_tools():
+    # Make sure basic stuff is there
+    if not find_executable("make"):
+        install_make()
+    if not find_executable("pre-commit"):
+        install_precommit()
+    install_compose_impersonation()
