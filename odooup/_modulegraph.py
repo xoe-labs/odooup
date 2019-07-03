@@ -42,6 +42,8 @@ def _read_manifest(addon_dir):
 def _find_addons(dir):
     """ yield (addon_name, addon_dir, manifest) """
     for root, _, files in os.walk(dir):
+        if ".git" in root:
+            continue
         if any(s in root for s in SKIP_PATHS):
             continue
         if any(M in files for M in MANIFEST_NAMES):
