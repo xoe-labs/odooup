@@ -158,24 +158,7 @@ def ensure_dockerignore_updated(g):
         f.write(dockerignore_snippet)
 
 
-@click.command()
-@click.option(
-    "--skip-native",
-    is_flag=True,
-    default=True,
-    prompt="Ignore native modules from sparse checkout config?",
-    help="Excludes native modules form sparse checkout configuration.",
-)
-@click.argument("module", required=True)
-def whitelist(module, skip_native):
-    """ Whitleist a module dependency tree for sparse checkout """
-
-    if not (
-        call_cmd("git rev-parse --is-inside-work-tree", exit_on_error=False) == "true"
-    ):
-        click.get_current_context().fail("You are not inside a work tree.")
-    rootpath = os.path.abspath(".")
-    g = get_graph(rootpath)
+def _handle_module(g, module, rootpath, skip_native):
     try:
         deps = ancestors(g, module)
     except networkx.exception.NetworkXError:
@@ -244,6 +227,39 @@ def whitelist(module, skip_native):
             should.remove("!setup/**")
         with open(ns_path, "w") as f:
             f.write("\n".join(should) + "\n!setup/**\n")
+
+
+@click.command()
+@click.option(
+    "--skip-native",
+    is_flag=True,
+    default=True,
+    prompt="Ignore native modules from sparse checkout config?",
+    help="Excludes native modules form sparse checkout configuration.",
+)
+@click.argument(
+    "module",
+    help="If no module specified, whitelist all depedencies of all modules "
+    "listed in src.",
+)
+def whitelist(module, skip_native):
+    """ Whitleist a module dependency tree for sparse checkout """
+
+    if not (
+        call_cmd("git rev-parse --is-inside-work-tree", exit_on_error=False) == "true"
+    ):
+        click.get_current_context().fail("You are not inside a work tree.")
+
+    rootpath = os.path.abspath(".")
+    g = get_graph(rootpath)
+    # If no module is set, whitelist based on src folder
+    if not module:
+        for module in g:
+            node = g.node[module]
+            if "namespace" in node and "src/" in node["namespace"]:
+                _handle_module(g, module, rootpath, skip_native)
+    else:
+        _handle_module(g, module, rootpath, skip_native)
 
     ensure_sparse_checkouts(rootpath)
 
