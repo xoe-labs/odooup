@@ -190,7 +190,7 @@ def _handle_module(g, module, rootpath, skip_native):
         )
 
     # src folder modules should not be white listed
-    if "src/" in node["namespace"]:
+    if "src" in node["namespace"]:
         include = {}
     else:
         include = {node["namespace"]: {module}}
@@ -211,7 +211,7 @@ def _handle_module(g, module, rootpath, skip_native):
         if skip_native and "vendor/odoo" in node["namespace"]:
             continue
         # src folder dependencies should not be white listed
-        if "src/" in node["namespace"]:
+        if "src" in node["namespace"]:
             continue
         include.setdefault(ns, set())
         include[ns] |= {dep}
