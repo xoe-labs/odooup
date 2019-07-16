@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import errno
 import os
+import re
 import subprocess
 
 import click
+
+REPO_REGEXP = r"(?P<prefix>git@|https://)(?P<host>[\w\.@]{1,})(/|:)(?P<org>[\w,\-,_,/]{1,})/(?P<project>[\w,\-,_]{1,})(.git){0,1}((/){0,1})"  # noqa
 
 
 def call_cmd(cmd, echo_cmd=True, exit_on_error=True, cwd=None):
@@ -40,3 +43,28 @@ def mkdir_p(path):
     except OSError as exc:  # Python >2.5
         if not (exc.errno == errno.EEXIST and os.path.isdir(path)):
             raise
+
+
+class NotAGitURL(RuntimeError):
+    pass
+
+
+def parse_git_url(url):
+    """get the parts of a git url"""
+    matches = re.search(REPO_REGEXP, url)
+    try:
+        prefix = matches.group("prefix")
+        host = matches.group("host")
+        org = matches.group("org")
+        project = matches.group("project")
+    except (AttributeError, IndexError):
+        raise NotAGitURL()
+    return prefix, host, org, project
+
+
+def get_fs_target(repo_url):
+    _, _, org, project = parse_git_url(repo_url)
+    home_path = os.path.expanduser("~")
+    org_path = os.path.join(home_path, "odoo", org)
+    mkdir_p(os.path.join(home_path, org_path))
+    return os.path.join(home_path, org_path, project)

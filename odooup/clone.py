@@ -2,8 +2,8 @@ import os
 
 import click
 
-from ._cache import cache_repo, parse_git_url
-from ._helpers import call_cmd, mkdir_p
+from ._cache import cache_repo
+from ._helpers import call_cmd, get_fs_target, mkdir_p, parse_git_url
 from ._installers import install_tools
 from .whitelist import ensure_sparse_checkouts
 
@@ -83,14 +83,6 @@ def clone_submodule_to_target(branch, url, target):
         echo_cmd=True,
         exit_on_error=False,
     )
-
-
-def get_fs_target(repo_url):
-    _, _, org, project = parse_git_url(repo_url)
-    home_path = os.path.expanduser("~")
-    org_path = os.path.join(home_path, "odoo", org)
-    mkdir_p(os.path.join(home_path, org_path))
-    return os.path.join(home_path, org_path, project)
 
 
 def get_vendor_target(repo_url):

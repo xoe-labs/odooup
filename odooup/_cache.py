@@ -1,34 +1,14 @@
 import os
-import re
 
 import appdirs
 
 from ._helpers import call_cmd, mkdir_p
-
-REPO_REGEXP = r"(?P<prefix>git@|https://)(?P<host>[\w\.@]{1,})(/|:)(?P<org>[\w,\-,_,/]{1,})/(?P<project>[\w,\-,_]{1,})(.git){0,1}((/){0,1})"  # noqa
 
 
 def construe_git_url(prefix, host, org, project):
     """construe a git url from it's parts"""
     sep = ":" if prefix.startswith("git") else "/"
     return prefix + host + sep + org + "/" + project  # + '.git'
-
-
-class NotAGitURL(RuntimeError):
-    pass
-
-
-def parse_git_url(url):
-    """get the parts of a git url"""
-    matches = re.search(REPO_REGEXP, url)
-    try:
-        prefix = matches.group("prefix")
-        host = matches.group("host")
-        org = matches.group("org")
-        project = matches.group("project")
-    except (AttributeError, IndexError):
-        raise NotAGitURL()
-    return prefix, host, org, project
 
 
 def cache_repo(prefix, host, org, project):
