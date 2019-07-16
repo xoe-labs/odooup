@@ -262,6 +262,11 @@ def whitelist(module, skip_native):
 
     # Validate we are in the right folder (~/odoo/org/project)
     repo_url = call_cmd("git config --local remote.origin.url")
+    if not repo_url:
+        click.get_current_context().fail(
+            "This project has no origin repo (yet). Please configure an origin "
+            "first before continuing with white listing operations."
+        )
     top_level = call_cmd("git rev-parse --show-toplevel")
     expected_path = get_fs_target(repo_url)
     if expected_path != top_level:
