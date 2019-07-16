@@ -73,7 +73,7 @@ def _get_all_sparse_files(g):
         ns_path = _get_sparse_persistence_file(ns)
         if os.path.isfile(ns_path):
             sparse_files |= {ns_path}
-    return sparse_files
+    return sorted(sparse_files)
 
 
 def _warn_missing_dependencies(g, rootpath):
@@ -145,7 +145,7 @@ def ensure_dockerignore_updated(g):
         with open(file, "r") as f:
             existing = set(f.read().splitlines())
         less = ["!" + os.path.join(ns, l) for l in existing if "!setup" not in l]
-        dockerignore_snippet += "\n".join(ignore + less) + "\n"
+        dockerignore_snippet += "\n".join(ignore + sorted(less)) + "\n"
 
     with open(".dockerignore", "r") as f:
         lines = f.read().splitlines()
