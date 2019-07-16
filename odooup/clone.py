@@ -5,7 +5,7 @@ import click
 from ._cache import cache_repo, parse_git_url
 from ._helpers import call_cmd, mkdir_p
 from ._installers import install_tools
-from .whitelist import enable_sparse_checkout_for_repo
+from .whitelist import ensure_sparse_checkouts
 
 
 def _clone(branch, url):
@@ -119,7 +119,7 @@ def clone(branch, url, whitelist, dissociate):
     target = _clone(branch, url)
     _clone_submodules(branch, target, dissociate)
     if whitelist:
-        enable_sparse_checkout_for_repo(target)
+        ensure_sparse_checkouts(target)
 
 
 if __name__ == "__main__":

@@ -50,21 +50,11 @@ def _warn_path_length(g, deps):
         click.secho(" > ".join(dag_longest_path(sub)), fg="white", bold=True)
 
 
-def enable_sparse_checkout_for_repo(rootpath):
+def ensure_sparse_checkouts(rootpath):
     for root, _, files in os.walk(rootpath):
         for file in files:
             if file.startswith(".sparse-"):
                 ns = os.path.join(root, file[8:])
-                if (
-                    call_cmd(
-                        "git config core.sparseCheckout",
-                        echo_cmd=False,
-                        exit_on_error=False,
-                        cwd=ns,
-                    )
-                    == "True"
-                ):
-                    continue
                 _symlink_sparse_file(ns)
                 call_cmd(
                     "git config core.sparseCheckout True", exit_on_error=False, cwd=ns
@@ -146,7 +136,7 @@ def _reconcile_auto_install(g):
     return state_change
 
 
-def reconcile_dockerignore_placeholder(g):
+def ensure_dockerignore_updated(g):
     all_sparse_files = _get_all_sparse_files(g)
     dockerignore_snippet = ""
     for file in all_sparse_files:
@@ -255,12 +245,12 @@ def whitelist(module, skip_native):
         with open(ns_path, "w") as f:
             f.write("\n".join(should) + "\n!setup/**\n")
 
-    enable_sparse_checkout_for_repo(rootpath)
+    ensure_sparse_checkouts(rootpath)
 
     while _reconcile_auto_install(g):
         pass
 
-    reconcile_dockerignore_placeholder(g)
+    ensure_dockerignore_updated(g)
 
     _warn_missing_dependencies(g, rootpath)
 
