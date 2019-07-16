@@ -18,7 +18,7 @@ def _get_sparse_persistence_file(ns):
 def _get_ns_from_sparse_persistence_file(ns_path):
     # Get from vendor downstream
     path = "".join(ns_path.partition("vendor")[1:])
-    return os.path.join(os.path.dirname(path), os.path.basename(path).lstrip("."))
+    return os.path.join(os.path.dirname(path), os.path.basename(path)[8:])
 
 
 def _get_sparse_file(ns):
