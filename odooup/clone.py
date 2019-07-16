@@ -27,6 +27,7 @@ def _clone_submodules(branch, target, dissociate):
         for s in call_cmd(
             "git submodule", echo_cmd=False, exit_on_error=True, cwd=target
         ).split("\n")
+        if s
     ]
     for submodule in submodules:
         name = call_cmd(
