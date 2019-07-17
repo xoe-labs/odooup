@@ -143,7 +143,9 @@ def init(odoo_version, is_enterprise, project):
     call_cmd("git add .")
     call_cmd('git commit -m "Customize Project"')
 
-    call_cmd("pre-commit install")
+    call_cmd("pre-commit install --hook-type pre-commit")
+    call_cmd("pre-commit install --hook-type commit-msg")
+    call_cmd("pre-commit install --install-hooks")
     click.echo(
         "Next, run: " + click.style("`cd {} && make info`".format(project), fg="yellow")
     )
