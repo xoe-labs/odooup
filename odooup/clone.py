@@ -112,11 +112,13 @@ def clone(branch, url, whitelist, dissociate):
     _clone_submodules(branch, target, dissociate)
     if whitelist:
         ensure_sparse_checkouts(target)
-
-    call_cmd("git config commit.template $(pwd)/.git-commit-template")
-    call_cmd("pre-commit install --hook-type pre-commit")
-    call_cmd("pre-commit install --hook-type commit-msg")
-    call_cmd("pre-commit install --install-hooks")
+    call_cmd(
+        "git config commit.template " "{}/.git-commit-template".format(target),
+        cwd=target,
+    )
+    call_cmd("pre-commit install --hook-type pre-commit", cwd=target)
+    call_cmd("pre-commit install --hook-type commit-msg", cwd=target)
+    call_cmd("pre-commit install --install-hooks", cwd=target)
 
 
 if __name__ == "__main__":
