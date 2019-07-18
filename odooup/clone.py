@@ -113,6 +113,7 @@ def clone(branch, url, whitelist, dissociate):
     if whitelist:
         ensure_sparse_checkouts(target)
 
+    call_cmd("git config commit.template $(pwd)/.git-commit-template")
     call_cmd("pre-commit install --hook-type pre-commit")
     call_cmd("pre-commit install --hook-type commit-msg")
     call_cmd("pre-commit install --install-hooks")
