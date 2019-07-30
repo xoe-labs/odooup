@@ -75,7 +75,7 @@ def ask_for_additional_repos():
 )
 @click.argument("project", required=True)
 def init(odoo_version, is_enterprise, project):
-    """ Bootstrap you Odoo project """
+    """ Bootstrap your OdooUp project."""
     additional_repos = ask_for_additional_repos()
     project = project.lower()  # docker doesn't permit uppercase project names
 

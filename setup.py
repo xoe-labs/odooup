@@ -41,7 +41,7 @@ setup(
         [core_package.cli_plugins]
         version=odooup.cli:version
         init=odooup.init:init
-        repo=odooup.repo:repo
+        patches=odooup.patches:patches
         whitelist=odooup.whitelist:whitelist
         clone=odooup.clone:clone
     """,

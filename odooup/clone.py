@@ -107,6 +107,7 @@ def get_vendor_target(repo_url):
 @click.argument("branch", required=True)
 @click.argument("url", required=True)
 def clone(branch, url, whitelist, dissociate):
+    """Clone an OdooUp project."""
     install_tools()
     target = _clone(branch, url)
     _clone_submodules(branch, target, dissociate)

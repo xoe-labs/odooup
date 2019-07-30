@@ -16,13 +16,13 @@ CONTEXT_SETTINGS = dict(auto_envvar_prefix="ODOOUP")
 @with_plugins(iter_entry_points("core_package.cli_plugins"))
 @click.group(context_settings=CONTEXT_SETTINGS)
 def main():
-    """Commandline interface for odooup commands."""
+    """Commandline interface for OdooUp commands."""
     pass
 
 
 @main.command()
 def version():
-    """The version"""
+    """Show the OdooUp version."""
     click.secho("Click Version: {}".format(click.__version__), fg="green")
     click.secho("Python Version: {}".format(sys.version), fg="green")
     click.secho("OdooUp Version: {}".format(__version__), fg="yellow")

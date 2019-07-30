@@ -265,15 +265,14 @@ class Git(object):
 @click.option("--origin", default="origin", help="Name of odoo-dev origin.")
 @click.option("--upstream", default="upstream", help="Name of odoo-dev upstream.")
 @click.pass_context
-def repo(ctx, git_dir, origin, upstream):
-    """ Run git commands for custom odoo-dev repository.
-    """
+def patches(ctx, git_dir, origin, upstream):
+    """Manage Odoo patches in a custom repo."""
     ctx.ensure_object(dict)
 
     ctx.obj["GIT"] = Git(git_dir, origin, upstream=upstream)
 
 
-@repo.command()
+@patches.command()
 @click.option(
     "--update/--no-update",
     "-u",
@@ -311,7 +310,7 @@ def maintain(ctx, update, rebase, compile_branch, auto, branches):
         git.compile()
 
 
-@repo.group()
+@patches.group()
 @click.pass_context
 def backport(ctx):
     """ Run backporting operations.
@@ -352,4 +351,4 @@ def branch(ctx, name, branches):
 
 
 if __name__ == "__main__":
-    repo()
+    patches()
