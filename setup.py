@@ -39,6 +39,7 @@ setup(
         [console_scripts]
         odooup=odooup.cli:main
         [core_package.cli_plugins]
+        version=odooup.cli:version
         init=odooup.init:init
         repo=odooup.repo:repo
         whitelist=odooup.whitelist:whitelist
