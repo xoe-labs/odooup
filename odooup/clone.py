@@ -30,6 +30,7 @@ def _clone_submodules(branch, target, dissociate):
         if s
     ]
     for submodule in submodules:
+        click.secho("Getting Submodule: {}".format(submodule), fg="yellow")
         name = call_cmd(
             "git submodule--helper name {}".format(submodule),
             echo_cmd=False,

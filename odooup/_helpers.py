@@ -46,6 +46,17 @@ def mkdir_p(path):
 
 
 class NotAGitURL(RuntimeError):
+    """Exception raised for urls which do not represent a known git repo url.
+
+    Attributes:
+        expression -- input expression in which the error occurred
+        message -- explanation of the error
+    """
+
+    def __init__(self, expression, message):
+        self.expression = expression
+        self.message = message
+
     pass
 
 
@@ -58,7 +69,7 @@ def parse_git_url(url):
         org = matches.group("org")
         project = matches.group("project")
     except (AttributeError, IndexError):
-        raise NotAGitURL()
+        raise NotAGitURL(url, "Not a known git url")
     return prefix, host, org, project
 
 
