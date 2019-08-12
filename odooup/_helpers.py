@@ -6,7 +6,7 @@ import subprocess
 
 import click
 
-REPO_REGEXP = r"(?P<prefix>git@|https://)(?P<host>[\w\.@]{1,})(/|:)(?P<org>[\w,\-,_,/]{1,})/(?P<project>[\w,\-,_]{1,})(.git){0,1}((/){0,1})"  # noqa
+REPO_REGEXP = r"(?P<prefix>git@|https://|http://)(?P<host>[\w\.@]{1,})(/|:)(?P<org>[\w,\-,_,/]{1,})/(?P<project>[\w,\-,_]{1,})(.git){0,1}((/){0,1})"  # noqa
 
 
 def call_cmd(cmd, echo_cmd=True, exit_on_error=True, cwd=None):
