@@ -5,9 +5,16 @@ Changes
 .. ----------
 .. -
 
+0.1.1 (2019-05-14)
+------------------
+- Fix global src modules whitelisting (whitelist without argument)
+- Add more useful dependency logs (no more longest dep warning)
+- Add more useful dependency logs (show successors of missing deps)
+- Fix autoinstall whitlisted modules
+
 0.1.0 (2019-05-14)
 ------------------
-- Be forgifing on non parsable manifests for dep whitelisting
+- Be forgiving on non parsable manifests for dep whitelisting
 
 [...]
 -----
