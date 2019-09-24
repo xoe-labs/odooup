@@ -2,7 +2,7 @@ import os
 
 import click
 import networkx
-from networkx import ancestors, dag_longest_path, subgraph
+from networkx import ancestors, bidirectional_shortest_path, dag_longest_path, subgraph
 
 from ._helpers import call_cmd, get_fs_target
 from ._modulegraph import get_graph
@@ -37,10 +37,15 @@ def _symlink_sparse_file(ns):
 
 def _log_longest_path_per_module(module, g, deps):
     sub = subgraph(g, deps)
-    click.secho("Longest path... ", fg="green", bold=True, nl=False)
-    click.secho(" > ".join(dag_longest_path(sub)), fg="white", bold=True, nl=False)
-    click.secho(" > " + module + ":", fg="green", bold=True)
-    click.secho(", ".join(deps), fg="white")
+    predecessors = set(g.predecessors(module))
+    click.secho(module + ": ", fg="green", bold=True, nl=False)
+    click.secho(", ".join(predecessors), fg="yellow")
+    click.secho(
+        "Shortest: " + " > ".join(bidirectional_shortest_path(g, "base", module)),
+        fg="white",
+    )
+    click.secho("Longest:  " + " > ".join(dag_longest_path(sub)), fg="white")
+    click.secho("All Deps: " + ", ".join(sorted(list(deps - predecessors))), fg="white")
 
 
 def ensure_sparse_checkouts(rootpath):
@@ -237,18 +242,21 @@ def whitelist(module, skip_native):
 
     # We are inside of a git
     if not (
-        call_cmd("git rev-parse --is-inside-work-tree", exit_on_error=False) == "true"
+        call_cmd(
+            "git rev-parse --is-inside-work-tree", exit_on_error=False, echo_cmd=False
+        )
+        == "true"
     ):
         click.get_current_context().fail("You are not inside a work tree.")
 
     # Validate we are in the right folder (~/odoo/org/project)
-    repo_url = call_cmd("git config --local remote.origin.url")
+    repo_url = call_cmd("git config --local remote.origin.url", echo_cmd=False)
     if not repo_url:
         click.get_current_context().fail(
             "This project has no origin repo (yet). Please configure an origin "
             "first before continuing with white listing operations."
         )
-    top_level = call_cmd("git rev-parse --show-toplevel")
+    top_level = call_cmd("git rev-parse --show-toplevel", echo_cmd=False)
     expected_path = get_fs_target(repo_url)
     if expected_path != top_level:
         click.get_current_context().fail(
@@ -256,6 +264,12 @@ def whitelist(module, skip_native):
             "This project is expected to live in {}".format(expected_path)
         )
 
+    click.secho(
+        "Note: graph is analyised against commited state, NOT the working "
+        "directory or index!\n",
+        fg="green",
+        bold=True,
+    )
     # Start white listing
     g = get_graph(top_level)
     # If no module is set, whitelist based on src folder
