@@ -5,6 +5,7 @@
 import ast
 import os
 
+import click
 import networkx as nx
 
 from ._helpers import call_cmd
@@ -13,14 +14,13 @@ MANIFEST_NAMES = ("__manifest__.py", "__openerp__.py", "__terp__.py")
 SKIP_PATHS = ["point_of_sale/tools"]
 
 
-def _parse_manifest_from_git(repo_path, manifest_object):
-    s = call_cmd(
+def _get_manifest_from_git(repo_path, manifest_object):
+    return call_cmd(
         "git cat-file -p {manifest_object}".format(**locals()),
         echo_cmd=False,
         exit_on_error=False,
         cwd=repo_path,
     )
-    return ast.literal_eval(s)
 
 
 def _find_addons(dir):
@@ -49,7 +49,13 @@ def _find_addons(dir):
         }
     for repo_path, manifest_object, manifest_path in manifests:
         module_path = os.path.dirname(manifest_path)
-        manifest = _parse_manifest_from_git(repo_path, manifest_object)
+
+        try:
+            manifest_str = _get_manifest_from_git(repo_path, manifest_object)
+            manifest = ast.literal_eval(manifest_str)
+        except SyntaxError:
+            click.secho("Error Parsing: {}".format(module_path), fg="yellow")
+            continue
         yield os.path.dirname(module_path), os.path.basename(module_path), manifest
 
 

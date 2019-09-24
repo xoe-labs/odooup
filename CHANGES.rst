@@ -5,6 +5,13 @@ Changes
 .. ----------
 .. -
 
+0.1.0 (2019-05-14)
+------------------
+- Be forgifing on non parsable manifests for dep whitelisting
+
+[...]
+-----
+
 0.0.4 (2019-05-14)
 ------------------
 Fixed
