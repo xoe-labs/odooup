@@ -2,7 +2,7 @@
 # Copyright 2019 XOE Labs (<https://xoe.solutions>)
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html).
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 import sys
 

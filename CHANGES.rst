@@ -5,6 +5,11 @@ Changes
 .. ----------
 .. -
 
+0.1.2 (2019-09-24)
+------------------
+- Fix graph loading order for drop in module overrides
+- Improve wihtelisting logs further (shotest path, longest path, deps)
+
 0.1.1 (2019-05-14)
 ------------------
 - Fix global src modules whitelisting (whitelist without argument)
