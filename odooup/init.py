@@ -11,7 +11,7 @@ from ._installers import install_tools
 from .clone import clone_submodule_to_target, get_vendor_target
 
 ODOO_VERSIONS = OrderedDict(
-    [("10", "10.0"), ("11", "11.0"), ("12", "12.0"), ("m", "master")]
+    [("10", "10.0"), ("11", "11.0"), ("12", "12.0"), ("13", "13.0"), ("m", "master")]
 )
 
 IS_GIT_URL_REGEXP = (
