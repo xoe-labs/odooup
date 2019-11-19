@@ -22,7 +22,7 @@ after_success:
 jobs:
   include:
   - stage: linting
-    python: 3.6
+    python: 3.7
     env: TOXENV=pre-commit
   - stage: deploy
     script: echo "Deploy to PyPi"
