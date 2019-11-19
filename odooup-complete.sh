@@ -7,7 +7,7 @@ _odooup_completion() {
     return 0
 }
 
-_odooup_completionetup() {
+_odooup_completion_setup() {
     local COMPLETION_OPTIONS=""
     local BASH_VERSION_ARR=(${BASH_VERSION//./ })
     # Only BASH version 4.4 and later have the nosort option.
@@ -18,4 +18,4 @@ _odooup_completionetup() {
     complete $COMPLETION_OPTIONS -F _odooup_completion odooup
 }
 
-_odooup_completionetup;
+_odooup_completion_setup;
