@@ -49,7 +49,7 @@ $ odooup --help
 ## Contribute
 
 - Just follow your instinct & open a PR.
-- If you want to pre discuss, join https://matrix.to/#/#odooup:matrix.org.
+- If you want to discuss with a person, join https://matrix.to/#/#odooup:matrix.org.
 - Be _somewhat_ familiar with:
     - [`tox`](https://tox.readthedocs.io/en/latest/)
     - [`pre-commit`](https://pre-commit.com/)
