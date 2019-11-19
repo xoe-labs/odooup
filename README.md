@@ -39,11 +39,11 @@ $ odooup --help
 <sub>Not all components are implemented or operational. Meanwhile, this aims to be a compelling set of tooling to be made available through `odooup`.</sub>
 
 - `odooup` - the CLI entrypoint
-- `odooup init` - bootstrap a Odoo project leveraging docker
-- `odooup gen` - bootstrap modules based on bob templates
-- `odooup mask` - use advanced git plumbing to mask modules from your deployable source code
-- `odooup patch` - finally, a wholistic approach to upstream contributing
-- `odooup conform` - conform your code base to `X` (`X` is made available by supported transformers)
+- [`odooup init`](https://github.com/xoe-labs/odooup/tree/master/odooup-init#readme) - bootstrap a Odoo project leveraging docker
+- [`odooup gen`](https://github.com/xoe-labs/odooup/tree/master/odooup-gen#readme) - bootstrap modules based on bob templates
+- [`odooup mask`](https://github.com/xoe-labs/odooup/tree/master/odooup-mask#readme) - use advanced git plumbing to mask modules from your deployable source code
+- [`odooup patch`](https://github.com/xoe-labs/odooup/tree/master/odooup-patch#readme) - finally, a wholistic approach to upstream contributing
+- [`odooup conform`](https://github.com/xoe-labs/odooup/tree/master/odooup-conform#readme) - conform your code base to `X` (`X` is made available by supported transformers)
 
 
 ## Contribute
