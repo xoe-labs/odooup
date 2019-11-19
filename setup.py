@@ -12,10 +12,11 @@ setup(
     description="Odoo Project puppet master",
     long_description="\n".join(
         (
-            open(os.path.join(here, "README.rst")).read(),
-            open(os.path.join(here, "CHANGES.rst")).read(),
+            open(os.path.join(here, "README.md")).read(),
+            open(os.path.join(here, "CHANGES.md")).read(),
         )
     ),
+    long_description_content_type="text/markdown",
     use_scm_version=True,
     packages=find_packages(),
     setup_requires=["setuptools-scm"],

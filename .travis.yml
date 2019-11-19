@@ -24,8 +24,6 @@ jobs:
   - stage: linting
     python: 3.6
     env: TOXENV=pre-commit
-  - stage: linting
-    env: TOXENV=check-readme
   - stage: deploy
     script: echo "Deploy to PyPi"
     deploy:
